@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-""" add_code_to_SSM.py: Add the code from the associated Coded Binary Link
+""" add_code_to_SSM.py: Add the codes from the associated Coded Binary Link
         Matrix (CBLM) to a System Support Map (SSM).
 
 """
