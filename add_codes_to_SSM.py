@@ -17,13 +17,11 @@
     where <name> is a string that may or may not be constructed according to a
     convention defined in
     https://github.com/steve9000gi/extractMaps/blob/master/README.md.
-
 """
 
 import sys
 import os
 import json
-from pprint import pprint
 import re
 import ntpath
 
@@ -32,28 +30,26 @@ cblm_dir = sys.argv[2]
 cssm_dir = sys.argv[3]
 
 def add_codes_to_single_ssm(ssm, cblm, cssm_dir):
-    with open(ssm) as json_input_file: # Read in ssm.json file
-	json_object = json.load(json_input_file)
+    with open(ssm) as json_input_file:
+        json_object = json.load(json_input_file)
 
     nodes = json_object["nodes"]
     print 'ssm: ' + ssm + '; cblm: ' + cblm + "; " + str(len(nodes)) + " nodes"
 
-    clist = []
-
     with open(cblm) as cblm_file: # Read CBLM file as list, each item a row:
-	rows = cblm_file.read().split("\n");
+        rows = cblm_file.read().split("\n");
 
+    clist = []
     for row in rows: # clist becomes a list of sublists, each sublist a row
-	r = row.split("\t") # Split each row into a list of items
-	clist.append(r)
-
+        r = row.split("\t") # Split each row into a list of items
+        clist.append(r)
     clist.pop() # get rid of empty last row
 
     node_id_index = 1 # position for NodeID column in CBLM
     code_index = 4    # position for Code column in CBLM
 
     for c_node_line in clist[1:]: # Skipping headers, select each row
-	# Find which node in json object nodes has the same id  as the NodeID in
+        # Find which node in json object nodes has the same id  as the NodeID in
 	# the current c_node_line:
 	for j_ix, j_node in enumerate(nodes): # Look at each node in json object
 	    if str(j_node["id"]) == c_node_line[node_id_index]:
@@ -61,20 +57,20 @@ def add_codes_to_single_ssm(ssm, cblm, cssm_dir):
 		break
 
     # Finally, write the json object with codes added to file:
-    outfilename = cssm_dir + "/" + ntpath.basename(ssm) + "-C.json"
+    outfilename = (cssm_dir + "/" + os.path.splitext(ntpath.basename(ssm))[0]
+	        + "-C.json")
     print outfilename
     with open(outfilename, "w") as outfile:
 	json.dump(json_object, outfile)
 
 # main
 ssm_files = []
-ssm_files += [each for each in os.listdir(ssm_dir) if each.endswith(".json")]
+ssm_files += [fn for fn in os.listdir(ssm_dir) if fn.endswith(".json")]
 
 cblm_files = []
-cblm_files += [each for each in os.listdir(cblm_dir) if each.endswith("-CBLM.csv")]
+cblm_files += [fn for fn in os.listdir(cblm_dir) if fn.endswith("-CBLM.csv")]
 
-# There should be one CBLM for each SSM:
-print str(len(ssm_files)) + " =?= " + str(len(cblm_files))
+print str(len(ssm_files)) + " =?= " + str(len(cblm_files)) # 1 CBLM for each SSM
 
 for i, ssm in enumerate(ssm_files):
     ssm_path = ssm_dir + "/" + ssm
