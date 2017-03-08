@@ -1,23 +1,42 @@
 #!/usr/bin/env python
 
-""" add_codes_to_SSM.py: Add the codes from the associated Coded Binary Link
-        Matrix (CBLM) to a System Support Map (SSM).
+""" add_codes_to_SSMs.py: Add the code for each node in each file in a
+        directory of Coded Binary Link Matrices (CBLMs) to each corresponding
+	node in each file in a directory of SSM .JSON files in a directory of
+	System Support Maps (SSMs), and writes the results to a directory of 
+	files of Coded SSMs (CSSMs).
+
+    Usage:
+    ./add_codes_to_SSMs.py ssm_dir cblm_dir cssm_dir
+
+    Assumes that each SSM in ssm_dir has a corresponding CBLM file in cblm_dir,
+    and that the files for all three directories follow this naming convention:
+        SSM : "<name>.json"
+        CBLM: "<name>-CBLM.csv"
+        CSSM: "<name>-C.json"
+    where <name> is a string that may or may not be constructed according to a
+    convention defined in
+    https://github.com/steve9000gi/extractMaps/blob/master/README.md.
 
 """
 
 import sys
 import os
 import json
+from pprint import pprint
+import re
+import ntpath
 
-ssm = sys.argv[1]
-cblm = sys.argv[2]
+ssm_dir = sys.argv[1]
+cblm_dir = sys.argv[2]
+cssm_dir = sys.argv[3]
 
-def add_codes_to_single_ssm(ssm, cblm):
+def add_codes_to_single_ssm(ssm, cblm, cssm_dir):
     with open(ssm) as json_input_file: # Read in ssm.json file
 	json_object = json.load(json_input_file)
 
     nodes = json_object["nodes"]
-    print 'ssm: ' + ssm + '; cblm: ' + cblm + "; # nodes:" , len(nodes)
+    print 'ssm: ' + ssm + '; cblm: ' + cblm + "; " + str(len(nodes)) + " nodes"
 
     clist = []
 
@@ -36,16 +55,28 @@ def add_codes_to_single_ssm(ssm, cblm):
     for c_node_line in clist[1:]: # Skipping headers, select each row
 	# Find which node in json object nodes has the same id  as the NodeID in
 	# the current c_node_line:
-	for j_ix, j_node in enumerate(nodes): # Look at each node from json object
+	for j_ix, j_node in enumerate(nodes): # Look at each node in json object
 	    if str(j_node["id"]) == c_node_line[node_id_index]:
 		j_node["code"] = c_node_line[code_index] # Add matching code
 		break
 
     # Finally, write the json object with codes added to file:
-    outfilename = os.path.splitext(ssm)[0] + "-C.json"
+    outfilename = cssm_dir + "/" + ntpath.basename(ssm) + "-C.json"
     print outfilename
     with open(outfilename, "w") as outfile:
 	json.dump(json_object, outfile)
 
 # main
-add_codes_to_single_ssm(ssm, cblm)
+ssm_files = []
+ssm_files += [each for each in os.listdir(ssm_dir) if each.endswith(".json")]
+
+cblm_files = []
+cblm_files += [each for each in os.listdir(cblm_dir) if each.endswith("-CBLM.csv")]
+
+# There should be one CBLM for each SSM:
+print str(len(ssm_files)) + " =?= " + str(len(cblm_files))
+
+for i, ssm in enumerate(ssm_files):
+    ssm_path = ssm_dir + "/" + ssm
+    cblm_path = cblm_dir + "/" + cblm_files[i]
+    add_codes_to_single_ssm(ssm_path, cblm_path, cssm_dir)
