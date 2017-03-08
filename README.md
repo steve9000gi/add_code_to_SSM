@@ -19,11 +19,11 @@ Usage:<br>
 Assumes that each SSM in ssm_dir has a corresponding CBLM file in cblm_dir,
 and that the files for all three directories follow this naming convention:
 <ul>
-<li>SSM : "\_name\_.json"</li>
-<li>CBLM: "\_name\_-CBLM.csv"</li>
-<li>CSSM: "\_name\_-C.json"</li>
+<li>SSM : "_name_.json"</li>
+<li>CBLM: "_name_-CBLM.csv"</li>
+<li>CSSM: "_name_-C.json"</li>
 </ul>
-where \_name\_ is a string that may or may not be constructed according to a
+where _name_ is a string that may or may not be constructed according to a
 convention defined in
 https://github.com/steve9000gi/extractMaps/blob/master/README.md.
 </p>
